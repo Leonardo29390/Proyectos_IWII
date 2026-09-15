@@ -1,0 +1,386 @@
+openapi: 3.0.3
+info:
+  title: Gestor de Finanzas Personales API
+  description: |
+    API para gestionar ingresos, gastos, presupuestos y análisis financiero personal.
+    
+    ## Funcionalidades
+    - Registro y autenticación de usuarios (JWT)
+    - Registro de ingresos y gastos
+    - Gestión de categorías
+    - Presupuesto mensual
+    - Dashboard y estadísticas
+    - Exportación de datos (CSV/Excel)
+    - Conversión de monedas
+    - Recomendaciones con IA
+  version: 1.0.0
+  contact:
+    name: Proyecto Ingeniería Web II
+
+servers:
+  - url: http://127.0.0.1:5000/api
+    description: Servidor de desarrollo local
+
+tags:
+  - name: Health
+    description: Verificación del estado del servidor
+  - name: Auth
+    description: Autenticación y gestión de usuarios
+  - name: Transactions
+    description: Ingresos y gastos
+  - name: Categories
+    description: Categorías de transacciones
+  - name: Dashboard
+    description: Estadísticas y resúmenes
+  - name: AI
+    description: Recomendaciones con inteligencia artificial
+
+paths:
+  # ========== HEALTH ==========
+  /health/:
+    get:
+      tags: [Health]
+      summary: Verificar estado del servidor
+      responses:
+        '200':
+          description: Servidor funcionando
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  service:
+                    type: string
+                    example: Finanzas API
+                  version:
+                    type: string
+                    example: 1.0.0
+
+  # ========== AUTH ==========
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrar nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                  example: juanperez
+                email:
+                  type: string
+                  format: email
+                  example: juan@email.com
+                password:
+                  type: string
+                  format: password
+                  example: MiPassword123
+                default_currency:
+                  type: string
+                  default: COP
+                  example: COP
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+        '400':
+          description: Datos inválidos o usuario ya existe
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: juan@email.com
+                password:
+                  type: string
+                  format: password
+                  example: MiPassword123
+      responses:
+        '200':
+          description: Login exitoso, retorna JWT
+        '401':
+          description: Credenciales inválidas
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Obtener usuario autenticado
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Datos del usuario
+        '401':
+          description: No autorizado
+
+  # ========== TRANSACTIONS ==========
+  /transactions/:
+    get:
+      tags: [Transactions]
+      summary: Listar transacciones del usuario
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+            enum: [income, expense]
+          description: Filtrar por tipo
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+          description: Fecha inicial (YYYY-MM-DD)
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+          description: Fecha final (YYYY-MM-DD)
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 100
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Lista de transacciones
+        '401':
+          description: No autorizado
+
+    post:
+      tags: [Transactions]
+      summary: Crear nueva transacción
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, amount, description]
+              properties:
+                type:
+                  type: string
+                  enum: [income, expense]
+                  example: expense
+                amount:
+                  type: number
+                  example: 150000
+                currency:
+                  type: string
+                  default: COP
+                description:
+                  type: string
+                  example: Compra supermercado
+                category_id:
+                  type: integer
+                  example: 1
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Transacción creada
+        '400':
+          description: Datos inválidos
+
+  /transactions/{id}:
+    get:
+      tags: [Transactions]
+      summary: Obtener transacción por ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Datos de la transacción
+        '404':
+          description: No encontrada
+
+    put:
+      tags: [Transactions]
+      summary: Actualizar transacción
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                description:
+                  type: string
+                category_id:
+                  type: integer
+                date:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Transacción actualizada
+        '404':
+          description: No encontrada
+
+    delete:
+      tags: [Transactions]
+      summary: Eliminar transacción
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Transacción eliminada
+        '404':
+          description: No encontrada
+
+  # ========== CATEGORIES ==========
+  /transactions/categories:
+    get:
+      tags: [Categories]
+      summary: Listar categorías (globales + del usuario)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de categorías
+
+    post:
+      tags: [Categories]
+      summary: Crear nueva categoría
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type]
+              properties:
+                name:
+                  type: string
+                  example: Mascotas
+                type:
+                  type: string
+                  enum: [income, expense]
+                icon:
+                  type: string
+                  default: '💰'
+                color:
+                  type: string
+                  default: '#000000'
+      responses:
+        '201':
+          description: Categoría creada
+
+  # ========== DASHBOARD ==========
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Resumen financiero mensual
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: month
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - in: query
+          name: year
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Resumen de ingresos, gastos y balance
+
+  /dashboard/ai-advice:
+    get:
+      tags: [AI]
+      summary: Obtener recomendaciones financieras con IA
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Recomendaciones personalizadas
+
+  /dashboard/export:
+    get:
+      tags: [Dashboard]
+      summary: Exportar transacciones (CSV/JSON)
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum: [csv, json]
+            default: csv
+        - in: query
+          name: start_date
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: end_date
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Archivo exportado
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
