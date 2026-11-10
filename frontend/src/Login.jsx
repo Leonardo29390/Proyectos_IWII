@@ -1,30 +1,28 @@
 // src/Login.jsx
 import { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // <-- ESTO ES CLAVE
 
   const handleLogin = async (e) => {
-
     e.preventDefault();
     try {
-      // Conectamos con el backend de Flask
       const response = await axios.post('http://127.0.0.1:5000/api/auth/login', {
         email: email,
         password: password
       });
       
-      // Guardamos el token en el navegador
       localStorage.setItem('token', response.data.access_token);
       alert('¡Bienvenido de nuevo!');
-      // Aquí luego lo redirigiremos al Dashboard
-      // navigate('/dashboard'); 
+      navigate('/dashboard'); // <-- ESTO ES CLAVE
       
     } catch (err) {
-      setError(err.response?.data?.error || 'Error al iniciar sesión');
+      setError(err.response?.data?.error || err.message || 'Error al iniciar sesión');
     }
   };
 
