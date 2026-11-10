@@ -16,12 +16,14 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
-        # Registrar blueprints
+    # Registrar blueprints
     from app.routes.health import health_bp
-    from app.routes.auth import auth_bp  # <-- AGREGA ESTA LÍNEA
+    from app.routes.auth import auth_bp
+    from app.routes.transactions import transactions_bp  # <-- NUEVA LÍNEA
     
     app.register_blueprint(health_bp, url_prefix='/api/health')
-    app.register_blueprint(auth_bp, url_prefix='/api/auth')  # <-- AGREGA ESTA LÍNEA
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(transactions_bp, url_prefix='/api/transactions')  # <-- NUEVA LÍNEA
     
     # 🆕 RUTA RAÍZ (opcional)
     @app.route('/')
