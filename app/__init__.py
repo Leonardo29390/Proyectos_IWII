@@ -16,10 +16,26 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
-    # Registrar blueprints
+        # Registrar blueprints
     from app.routes.health import health_bp
+    from app.routes.auth import auth_bp  # <-- AGREGA ESTA LÍNEA
     
     app.register_blueprint(health_bp, url_prefix='/api/health')
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')  # <-- AGREGA ESTA LÍNEA
+    
+    # 🆕 RUTA RAÍZ (opcional)
+    @app.route('/')
+    def index():
+        return {
+            'message': '💰 Finanzas API funcionando',
+            'version': '1.0.0',
+            'endpoints': {
+                'health': '/api/health/',
+                'docs': '/docs (próximamente)',
+                'auth': '/api/auth (próximamente)',
+                'transactions': '/api/transactions (próximamente)'
+            }
+        }
     
     with app.app_context():
         db.create_all()
