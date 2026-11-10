@@ -14,7 +14,7 @@ def create_app(config_class=Config):
     
     db.init_app(app)
     jwt.init_app(app)
-    CORS(app, origins=app.config['CORS_ORIGINS'])
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     
     # Registrar blueprints
     from app.routes.health import health_bp
