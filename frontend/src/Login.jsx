@@ -1,7 +1,7 @@
 // src/Login.jsx
 import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -57,6 +57,9 @@ export default function Login() {
           Entrar
         </button>
       </form>
+            <p style={{ marginTop: '15px', textAlign: 'center' }}>
+        ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+      </p>
     </div>
   );
 }

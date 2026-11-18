@@ -5,12 +5,15 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import Login from './Login.jsx'
-import Dashboard from './Dashboard.jsx' // <-- Lo crearemos en un momento
+import Dashboard from './Dashboard.jsx' 
+// Importa Register
+import Register from './Register.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        <Route path="/register" element={<Register />} />
         <Route path="/" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>

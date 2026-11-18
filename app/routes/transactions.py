@@ -1,4 +1,8 @@
 # app/routes/transactions.py
+import csv
+import io
+from flask import Response
+import pandas as pd # Usamos pandas para el Excel
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
@@ -51,3 +55,40 @@ def get_transactions():
         'transactions': [t.to_dict() for t in transactions],
         'total': len(transactions)
     }), 200
+    
+    # Nueva ruta para EXPORTAR
+@transactions_bp.route('/export', methods=['GET'])
+@jwt_required()
+def export_transactions():
+    current_user_id = int(get_jwt_identity())
+    format_type = request.args.get('format', 'csv') # csv o excel
+    
+    transactions = Transaction.query.filter_by(user_id=current_user_id).all()
+    data = [t.to_dict() for t in transactions]
+
+    if not data:
+        return jsonify({'error': 'No hay transacciones para exportar'}), 404
+
+    df = pd.DataFrame(data)
+    # Limpiamos columnas que no sirven para el reporte
+    if 'id' in df.columns: df = df.drop(columns=['id', 'user_id', 'category_id'])
+
+    if format_type == 'csv':
+        output = io.StringIO()
+        df.to_csv(output, index=False)
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment;filename=mis_finanzas.csv"}
+        )
+    
+    elif format_type == 'excel':
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Transacciones')
+        output.seek(0)
+        return Response(
+            output.getvalue(),
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment;filename=mis_finanzas.xlsx"}
+        )
