@@ -1,4 +1,3 @@
-# app/__init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -16,28 +15,16 @@ def create_app(config_class=Config):
     jwt.init_app(app)
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
-    # Registrar blueprints
+    # Importaciones adentro de la función
     from app.routes.health import health_bp
     from app.routes.auth import auth_bp
-    from app.routes.transactions import transactions_bp  # <-- NUEVA LÍNEA
+    from app.routes.transactions import transactions_bp
+    from app.routes.dashboard import dashboard_bp
     
     app.register_blueprint(health_bp, url_prefix='/api/health')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
-    app.register_blueprint(transactions_bp, url_prefix='/api/transactions')  # <-- NUEVA LÍNEA
-    
-    # 🆕 RUTA RAÍZ (opcional)
-    @app.route('/')
-    def index():
-        return {
-            'message': '💰 Finanzas API funcionando',
-            'version': '1.0.0',
-            'endpoints': {
-                'health': '/api/health/',
-                'docs': '/docs (próximamente)',
-                'auth': '/api/auth (próximamente)',
-                'transactions': '/api/transactions (próximamente)'
-            }
-        }
+    app.register_blueprint(transactions_bp, url_prefix='/api/transactions')
+    app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     
     with app.app_context():
         db.create_all()

@@ -11,6 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
     default_currency = db.Column(db.String(3), default='COP')
+    monthly_budget = db.Column(db.Float, default=0.0)  # <-- ESTA LÍNEA ES LA CLAVE
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
@@ -26,5 +27,6 @@ class User(db.Model):
             'username': self.username,
             'email': self.email,
             'default_currency': self.default_currency,
+            'monthly_budget': self.monthly_budget,  # <-- Y ESTA TAMBIÉN
             'created_at': self.created_at.isoformat() if self.created_at else None
         }

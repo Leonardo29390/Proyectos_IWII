@@ -7,5 +7,6 @@ services:
     environment:
       - FLASK_ENV=development
       - CORS_ORIGINS=http://localhost:5173
+    command: python run.py
     volumes:
       - .:/app
