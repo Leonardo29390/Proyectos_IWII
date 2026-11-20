@@ -6,7 +6,6 @@
 
 ## 📸 Capturas de Pantalla
 
-*(Si guardaste las fotos en la carpeta assets, se mostrarán aquí. Si aún no las tienes, puedes borrar esta sección por ahora).*
 
 ### 1. Inicio de Sesión
 ![Login](assets/login.png)
@@ -15,7 +14,7 @@
 ![Create account](assets/create_accout.png)
 
 ### 3. Dashboard Financiero y Gráficos
-![Dashboard](assets/dashboard.png)
+![Dashboard](assets/Dashboard.png)
 
 ### 4. Asesoría con Inteligencia Artificial
 ![IA](assets/ia.png)
